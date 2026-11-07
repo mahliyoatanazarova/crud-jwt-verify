@@ -1,31 +1,161 @@
 const { read_file } = require("../fs/api")
 const { v4 } = require("uuid");
 
-const  getAllProducts= (req, res)=>{
-    const products=read_file("product.json");
+const getAllProducts = async (req, res) => {
+  try {
+    const products = read_file("product.json");
     res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal server error"
+    })
+  }
+
 };
 
 
 
-const addProduct=(req, res)=>{
-     const { title, desc , price}= req.body
- const products = read_file("product.json")
+const addProduct = async (req, res) => {
+  try {
+    const { title, desc, price } = req.body
+    const products = read_file("product.json")
 
- products.push({
-   id:v4(),
-   title,
-   desc,
-   price,
- })
-   write_file("product.json", products)
-   res.status(201).json({
-    message:"Aded new project"
-   })
+    products.push({
+      id: v4(),
+      title,
+      desc,
+      price,
+    })
+    write_file("product.json", products)
+    res.status(201).json({
+      message: "Aded new project"
+    })
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal server error"
+    })
+  }
 
 }
 
-module.exports={
-    getAllProducts,
-   addProduct
+
+
+const getOneProduct = async (req, res) => {
+  try {
+    const { id } = req.params
+    const products = read_file("product.json")
+
+    const foundedProduct = products.find((item) => item.id === id)
+
+    if (!foundedProduct) {
+      return res.status(404).json({
+        message: 'Product not found'
+      })
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal server error"
+    })
+  }
+}
+//   res.status(200).json(foundedProduct)
+// }
+
+
+
+const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { title, desc, price } = req.body
+    const products = read_file("product.json")
+
+    const foundedProduct = products.find((item) => item.id === id)
+
+    if (!foundedProduct) {
+      return res.status(404).json({
+        message: 'Product not found'
+      })
+    }
+
+
+    // // const products = read_file("product.json")
+
+    // const foundedProduct = products.find((item) => item.id === id)
+
+    // if (!foundedProduct) {
+    //   return res.status(404).json({
+    //     message: 'Product not found'
+    //   })
+    // }
+
+    products.forEch((item) => {
+
+      if (item.id === id) {
+        item.title = title ? title : item.title
+        item.desc = desc ? desc : item.tittle
+        item.price = price ? price : item.price
+      }
+    })
+
+    write_file("product.json", products)
+    res.status(201).json({
+      message: "Updated product"
+    })
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal server error"
+    })
+  }
+}
+
+//delete
+
+
+const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const products = read_file("product.json")
+
+    const foundedProduct = products.find((item) => item.id === id)
+
+    if (!foundedProduct) {
+      return res.status(404).json({
+        message: 'Product not found'
+      })
+    }
+    // const products = read_file("product.json")
+
+    // const foundedProduct = products.find((item) => item.id === id)
+
+    if (!foundedProduct) {
+      return res.status(404).json({
+        message: 'Product not found'
+      })
+    }
+
+    products.forEch((item, index) => {
+      if (item.id === id) {
+        products.splice(index, 1)
+      }
+    })
+
+    write_file("product.json", products)
+    res.status(201).json({
+      message: "Delete product"
+    })
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal server error"
+    })
+  }
+}
+
+module.exports = {
+  getAllProducts,
+  addProduct,
+  getOneProduct,
+  updateProduct,
+  deleteProduct
 }
